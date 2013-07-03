@@ -7,22 +7,31 @@ Author: jim912
 Version: 1.0
 Author URI: 
 */
+require_once( dirname( __FILE__ ) . '/functions.php' );
 
 class WP_Recent_Views {
 	
-	private $generations = 20;
-	private $post_types = array( 'post', 'corporation', 'case', 'event' );
+	private $default = array(
+		'generations' => 10,
+		'post_types'  => array( 'post', 'corporation', 'case', 'event' ),
+		'expire'      => 15
+	);
+	public $settings;
+	public $count = 1;
 
 	public function __construct() {
-		add_action( 'template_redirect', array( &$this, 'register_post' ), 9999 );
-		add_action( 'init'             , array( &$this, 'register_shortcode' ) );
-		add_action( 'admin_menu'       , array( &$this, 'add_setting_page' ) );
+		add_action( 'template_redirect'          , array( &$this, 'register_post' ), 9999 );
+		add_action( 'init'                       , array( &$this, 'register_shortcode' ) );
+		add_action( 'admin_menu'                 , array( &$this, 'add_setting_page' ) );
+		add_action( 'wp_ajax_recent_views'       , 'wp_ajax_recent_views' );
+		add_action( 'wp_ajax_nopriv_recent_views', 'wp_ajax_recent_views' );
+		$this->settings = array_merge( $this->default, get_option( 'recent-views', array() ) );
 	}
 	
 	
 	public function register_post() {
 		global $post;
-		if ( is_singular() && in_array( $post->post_type, $this->post_types ) ) {
+		if ( is_singular() && in_array( $post->post_type, $this->settings['post_types'] ) ) {
 			$recent_view_ids = isset( $_COOKIE['recent-views'] ) && preg_match( '/^[0-9,]+$/', $_COOKIE['recent-views'] ) ? $_COOKIE['recent-views'] : '';
 			$recent_view_ids = trim( $recent_view_ids, ',' );
 			$recent_view_ids = explode( ',', $recent_view_ids );
@@ -32,9 +41,9 @@ class WP_Recent_Views {
 				}
 			}
 			array_unshift( $recent_view_ids, $post->ID );
-			$recent_view_ids = array_slice( $recent_view_ids, 0, $this->generations );
+			$recent_view_ids = array_slice( $recent_view_ids, 0, $this->settings['generations'] );
 			$recent_view_ids = implode( ',', $recent_view_ids );
-			$expire = time() + 30 * 24 * 3600;
+			$expire = time() + $this->settings['expire'] * 24 * 3600;
 			setcookie( 'recent-views', $recent_view_ids, $expire, '/' );
 		}
 	}
@@ -66,6 +75,38 @@ class WP_Recent_Views {
 	
 	public function add_setting_page() {
 		add_options_page( '最近見たページ', '最近見たページ', 'manage_options', basename( __FILE__ ), array( &$this, 'setting_page' ) );
+		register_setting( 'recent-views', 'recent-views', array( &$this, 'sanitize_setting' ) );
+	}
+	
+	
+	public function sanitize_setting( $post_data ) {
+		foreach ( $post_data as $key => $value ) {
+			switch ( $key ) {
+				case 'generation' :
+				case 'expire' :
+					$post_data[$key] = absint( $value );
+					if ( ! $post_data[$key] ) {
+						$post_data[$key] = $this->settings[$key];
+					}
+					break;
+				case 'post_types' :
+					if ( is_array( $value ) ) {
+						$post_types = array_keys( get_post_types( array( 'public' => true ) ) );
+						$tmp = array();
+						foreach ( $value as $post_type ) {
+							if ( in_array( $post_type, $post_types ) ) {
+								$tmp[] = $post_type;
+							}
+						}
+						$post_data[$key] = $tmp;
+					} else {
+						$post_data[$key] = array();
+					}
+					break;
+				default :
+			}
+		}
+		return $post_data;
 	}
 	
 	
@@ -73,26 +114,4 @@ class WP_Recent_Views {
 		include dirname( __FILE__ ) . '/admin.php';
 	}
 }
-new WP_Recent_Views;
-
-
-function get_recent_views( $limit = 0 ) {
-	$recent_view_ids = isset( $_COOKIE['recent-views'] ) && preg_match( '/^[0-9,]+$/', $_COOKIE['recent-views'] ) ? $_COOKIE['recent-views'] : '';
-	$recent_view_ids = trim( $recent_view_ids, ',' );
-	$recent_view_ids = explode( ',', $recent_view_ids );
-	$recent_views = array();
-	foreach ( $recent_view_ids as $post_id ) {
-		if ( $post = get_post( $post_id ) ) {
-			$recent_views[] = $post;
-			if ( $limit > 0 && count( $recent_views ) >= $limit ) {
-				break;
-			}
-		}
-	}
-	return $recent_views;
-}
-
-
-function wp_ajax_recent_views() {
-	
-}
+$WP_Recent_Views = new WP_Recent_Views;
