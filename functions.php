@@ -1,8 +1,43 @@
 <?php
-function get_recent_views( $limit = 0 ) {
+function get_recent_views( $args ) {
+	global $WP_Recent_Views;
+
 	$recent_view_ids = isset( $_COOKIE['recent-views'] ) && preg_match( '/^[0-9,]+$/', $_COOKIE['recent-views'] ) ? $_COOKIE['recent-views'] : '';
 	$recent_view_ids = trim( $recent_view_ids, ',' );
 	$recent_view_ids = explode( ',', $recent_view_ids );
+	
+	if ( ! isset( $args['posts_per_page'] ) || ! $args['posts_per_page'] ) {
+		$length = get_option('posts_per_page');
+	} elseif ( $args['posts_per_page'] == -1 ) {
+		$length = NULL;
+	} else {
+		$length = absint( $args['posts_per_page'] );
+	}
+
+	if ( ! isset( $args['paged'] ) || ! $args['paged'] ) {
+		$args['paged'] = get_query_var( 'page' );
+	}
+
+	if ( isset( $args['offset'] ) && absint( $args['offset'] ) ) {
+		$offset = absint( $args['offset'] );
+			$WP_Recent_Views->numpages = 1;
+	} else {
+		if ( isset( $args['paged'] ) && absint( $args['paged'] ) && ! is_null( $length ) ) {
+			$offset = $length * ( absint( $args['paged'] ) - 1 );
+		} else {
+			$offset = 0;
+		}
+		$found_posts = count( $recent_view_ids );
+		if ( $length ) {
+			$WP_Recent_Views->numpages = ceil( $found_posts / $length );
+			$WP_Recent_Views->multipage = 1;
+		} else {
+			$WP_Recent_Views->numpages = 1;
+		}
+	}
+	
+	$recent_view_ids = array_slice( $recent_view_ids, $offset, $length );
+	
 	$recent_views = array();
 	foreach ( $recent_view_ids as $post_id ) {
 		if ( $post = get_post( $post_id ) ) {
@@ -17,7 +52,7 @@ function get_recent_views( $limit = 0 ) {
 
 
 
-function list_recent_views( $args ) {
+function wp_list_recent_views( $args ) {
 	global $WP_Recent_Views;
 	$defaults = array(
 		'limit' => 5,
@@ -26,13 +61,19 @@ function list_recent_views( $args ) {
 		'ul_id' => '',
 		'ul_class' => 'recent-views',
 		'style' => 'list',
-		'title_li' => __( 'Recent Views' ),
+		'title_li' => __( 'Recent Views', 'wp-recent-views' ),
 		'ajax' => false,
 		'echo' => 1
 	);
 	$r = wp_parse_args( $args, $defaults );
 	
-	$recent_views = get_recent_views( $r['limit'] );
+	$recent_views = get_recent_views(
+		array(
+			'offset' => 0,
+			'posts_per_page' => $args['limit'],
+			'paged' => 1,
+		)
+	);
 	
 	$output = '';
 	
@@ -66,8 +107,8 @@ function list_recent_views( $args ) {
 				}
 			}
 		} else {
-			wp_enqueue_script( 'list_recent_views', plugin_dir_url( __FILE__ ) . '/js/recent-views.js', array( 'jquery' ) );
-			wp_localize_script( 'list_recent_views', 'RecentViews', array(
+			wp_enqueue_script( 'wp_list_recent_views', plugin_dir_url( __FILE__ ) . '/js/recent-views.js', array( 'jquery' ) );
+			wp_localize_script( 'wp_list_recent_views', 'RecentViews', array(
 				'endpoint' => admin_url( 'admin-ajax.php' ),
 				'action' => 'recent_views',
 				'id' => $r['ul_id'],
@@ -83,7 +124,7 @@ function list_recent_views( $args ) {
 		}
 	}
 
-	$output = apply_filters( 'list_recent_views', $output );
+	$output = apply_filters( 'wp_list_recent_views', $output );
 	if ( $r['echo'] ) {
 		echo $output;
 	} else {
@@ -104,6 +145,6 @@ function wp_ajax_recent_views() {
 	if ( $limit = absint( $_POST['limit'] ) ) {
 		$args['limit'] = $limit;
 	}
-	list_recent_views( $args );
+	wp_list_recent_views( $args );
 	exit;
 }

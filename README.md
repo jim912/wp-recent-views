@@ -1,9 +1,7 @@
 wp-recent-views
 =============
 
-ユーザーの最近見たページを表示したりするWordPressのプラグインを作ってみたり。
-テンプレートタグ、list_recent_viewsは、ajaxにも対応したよ。
-www.warna.info で絶賛テスト中
-
-www.warna.info での記述
-<?php if ( function_exists( 'list_recent_views' ) ) list_recent_views( 'title_li=&show_option_none=&mode=ajax&limit=5' ); ?>
+ユーザーの最近見た記事をを表示するWordPressのプラグイン。
+ウィジェット対応。
+ウィジェット、テンプレートタグは、Ajax対応でキャッシュプラグインとの併用可能。
+ショートコードを記述することよって、ページ上に最近見たページを表示することも可能。

@@ -1,0 +1,81 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Recent Views\n"
+"POT-Creation-Date: 2013-07-09 19:03+0900\n"
+"PO-Revision-Date: 2013-07-09 19:52+0900\n"
+"Last-Translator: jim912"
+"Language-Team: jim912\n"
+"Language: japanese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.7\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: "
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: wp-recent-views\n"
+
+#: wp-recent-views/admin.php:7
+msgid "WP Recent Views"
+msgstr "WP Recent Views"
+
+#: wp-recent-views/admin.php:12
+msgid "Generations"
+msgstr "世代数"
+
+#: wp-recent-views/admin.php:15
+msgid ""
+"History will be saved in <a href=\"http://en.wikipedia.org/wiki/HTTP_cookie"
+"\">COOKIE</a>. For this reason, the data is not saved The more number of "
+"generations too, there is a risk of or damage. Please make up to about 100 "
+"at most."
+msgstr ""
+"履歴は<a href=\"http://ja.wikipedia.org/wiki/HTTP_cookie\">COOKIE</a>に保存さ"
+"れます。このため、あまり世代数を多くするとデータが保存されない、または破損す"
+"る恐れがあります。多くとも100程度までにしてください。"
+
+#: wp-recent-views/admin.php:19
+msgid "Post Types"
+msgstr "投稿タイプ"
+
+#: wp-recent-views/admin.php:35
+msgid "Expire"
+msgstr "保存期限"
+
+#: wp-recent-views/admin.php:39
+#, php-format
+msgid "%1s days"
+msgstr "%1s 日間"
+
+#: wp-recent-views/widget.php:6
+msgid "Display a list of pages you have seen recently."
+msgstr "最近見たページのリストを表示します。"
+
+#: wp-recent-views/widget.php:9 wp-recent-views/widget.php:13
+#: wp-recent-views/functions.php:64 wp-recent-views/wp-recent-views.php:96
+msgid "Recent Views"
+msgstr "最近見たページ"
+
+#: wp-recent-views/widget.php:30
+msgid "Title :"
+msgstr "タイトル："
+
+#: wp-recent-views/widget.php:33
+msgid "Items :"
+msgstr "表示数："
+
+#: wp-recent-views/widget.php:36
+msgid "Mode :"
+msgstr "モード："
+
+#: wp-recent-views/widget.php:38
+msgid "Default"
+msgstr "デフォルト"
+
+#: wp-recent-views/widget.php:39
+msgid "Ajax"
+msgstr "Ajax"
+
+#: wp-recent-views/functions.php:60
+msgid "No view"
+msgstr "履歴がありません"

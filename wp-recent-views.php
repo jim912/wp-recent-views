@@ -1,13 +1,15 @@
 <?php
 /*
 Plugin Name: WP Recent Views
-Plugin URI: 
-Description: 最近見たページ
+Plugin URI: https://github.com/jim912/wp-recent-views
+Description: Display a list of pages you have seen recently.
 Author: jim912
 Version: 1.0
-Author URI: 
+Author URI: http://www.warna.info/
+Text Domain: wp-recent-views
+Domain Path: /languages/
 */
-require_once( dirname( __FILE__ ) . '/functions.php' );
+
 
 class WP_Recent_Views {
 	
@@ -18,14 +20,28 @@ class WP_Recent_Views {
 	);
 	public $settings;
 	public $count = 1;
+	public $numpages;
+	public $multipage;
 
 	public function __construct() {
+		require_once( dirname( __FILE__ ) . '/functions.php' );
+		require_once( dirname( __FILE__ ) . '/widget.php' );
+
 		add_action( 'template_redirect'          , array( &$this, 'register_post' ), 9999 );
 		add_action( 'init'                       , array( &$this, 'register_shortcode' ) );
 		add_action( 'admin_menu'                 , array( &$this, 'add_setting_page' ) );
+		add_action( 'widgets_init'               , array( &$this, 'register_widget' ) );
 		add_action( 'wp_ajax_recent_views'       , 'wp_ajax_recent_views' );
 		add_action( 'wp_ajax_nopriv_recent_views', 'wp_ajax_recent_views' );
+
 		$this->settings = array_merge( $this->default, get_option( 'recent-views', array() ) );
+		load_plugin_textdomain( 'wp-recent-views', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+
+	}
+	
+	
+	public function register_widget() {
+		register_widget( 'WP_Recent_Views_Widget' );
 	}
 	
 	
@@ -54,11 +70,12 @@ class WP_Recent_Views {
 	}
 	
 	
-	public function recent_views_shortcode() {
-		global $post;
-		$return = '';
-		$recent_views = get_recent_views();
+	public function recent_views_shortcode( $args ) {
+		global $post, $numpages, $multipage;
 		
+		$atts = shortcode_atts( array( 'posts_per_page' => 0, 'offset' => 0, 'paged' => false ), $args );
+		$return = '';
+		$recent_views = get_recent_views( $atts );
 		$template = apply_filters( 'recent_views_template', dirname( __FILE__ ) . '/tpl/shortcode.php' );
 		ob_start();
 		foreach ( $recent_views as $post ) {
@@ -69,12 +86,14 @@ class WP_Recent_Views {
 		}
 		$return = ob_get_clean();
 		wp_reset_postdata();
+		$numpages = $this->numpages;
+		$multipage = $this->multipage;
 		return $return;
 	}
 	
 	
 	public function add_setting_page() {
-		add_options_page( '最近見たページ', '最近見たページ', 'manage_options', basename( __FILE__ ), array( &$this, 'setting_page' ) );
+		add_options_page( __( 'Recent Views', 'wp-recent-views' ), __( 'Recent Views', 'wp-recent-views' ), 'manage_options', basename( __FILE__ ), array( &$this, 'setting_page' ) );
 		register_setting( 'recent-views', 'recent-views', array( &$this, 'sanitize_setting' ) );
 	}
 	
@@ -113,5 +132,6 @@ class WP_Recent_Views {
 	public function setting_page() {
 		include dirname( __FILE__ ) . '/admin.php';
 	}
+
 }
 $WP_Recent_Views = new WP_Recent_Views;
