@@ -42,9 +42,6 @@ function get_recent_views( $args ) {
 	foreach ( $recent_view_ids as $post_id ) {
 		if ( $post = get_post( $post_id ) ) {
 			$recent_views[] = $post;
-			if ( $limit > 0 && count( $recent_views ) >= $limit ) {
-				break;
-			}
 		}
 	}
 	return $recent_views;

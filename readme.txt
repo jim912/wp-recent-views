@@ -1,7 +1,7 @@
 === WP Recent Views ===
 Contributors: jim912
 Tags: History, Ajax, Widget
-Requires at least: 3.0
+Requires at least: 3.3
 Tested up to: 3.6 beta4
 Stable tag: 1.0
 License: GPLv2 or later

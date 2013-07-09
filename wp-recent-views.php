@@ -33,6 +33,7 @@ class WP_Recent_Views {
 		add_action( 'widgets_init'               , array( &$this, 'register_widget' ) );
 		add_action( 'wp_ajax_recent_views'       , 'wp_ajax_recent_views' );
 		add_action( 'wp_ajax_nopriv_recent_views', 'wp_ajax_recent_views' );
+		remove_action('wp_head', 'adjacent_posts_rel_link_wp_head');
 
 		$this->settings = array_merge( $this->default, get_option( 'recent-views', array() ) );
 		load_plugin_textdomain( 'wp-recent-views', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
