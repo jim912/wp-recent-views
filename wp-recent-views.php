@@ -102,8 +102,12 @@ class WP_Recent_Views {
 	public function sanitize_setting( $post_data ) {
 		foreach ( $post_data as $key => $value ) {
 			switch ( $key ) {
-				case 'generation' :
+				case 'generations' :
 				case 'expire' :
+					if ( function_exists( 'mb_convert_kana' ) ) {
+						$value = mb_convert_kana( $value, 'n', 'UTF-8' );
+					}
+					$value = preg_replace( '/[^0-9]/', '', $value );
 					$post_data[$key] = absint( $value );
 					if ( ! $post_data[$key] ) {
 						$post_data[$key] = $this->settings[$key];
@@ -124,6 +128,7 @@ class WP_Recent_Views {
 					}
 					break;
 				default :
+					unset( $post_data[$key] );
 			}
 		}
 		return $post_data;
