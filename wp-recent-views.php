@@ -15,7 +15,7 @@ class WP_Recent_Views {
 	
 	private $default = array(
 		'generations' => 10,
-		'post_types'  => array( 'post', 'corporation', 'case', 'event' ),
+		'post_types'  => array( 'post' ),
 		'expire'      => 15
 	);
 	public $settings;
