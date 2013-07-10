@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 class WP_Recent_Views_Widget extends WP_Widget {
 	public function WP_Recent_Views_Widget() {
 		$widget_ops = array(

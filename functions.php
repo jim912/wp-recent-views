@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 function get_recent_views( $args ) {
 	global $WP_Recent_Views;
 
