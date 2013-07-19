@@ -22,12 +22,17 @@ class WP_Recent_Views {
 	public $count = 1;
 	public $numpages;
 	public $multipage;
+	public $version;
 
 	public function __construct() {
 		require_once( dirname( __FILE__ ) . '/functions.php' );
 		require_once( dirname( __FILE__ ) . '/widget.php' );
 
-		add_action( 'template_redirect'          , array( &$this, 'register_post' ), 9999 );
+		$data = get_file_data( __FILE__, array( 'version' => 'Version' ) );
+		$this->version = $data['version'];
+
+		add_action( 'template_redirect'          , array( &$this, 'enqueue_script' ) );
+		add_action( 'wp_footer'                  , array( &$this, 'register_post_id' ), 9 );
 		add_action( 'init'                       , array( &$this, 'register_shortcode' ) );
 		add_action( 'admin_menu'                 , array( &$this, 'add_setting_page' ) );
 		add_action( 'widgets_init'               , array( &$this, 'register_widget' ) );
@@ -46,23 +51,24 @@ class WP_Recent_Views {
 	}
 	
 	
-	public function register_post() {
+	public function enqueue_script() {
 		global $post;
 		if ( is_singular() && in_array( $post->post_type, $this->settings['post_types'] ) ) {
-			$recent_view_ids = isset( $_COOKIE['recent-views'] ) && preg_match( '/^[0-9,]+$/', $_COOKIE['recent-views'] ) ? $_COOKIE['recent-views'] : '';
-			$recent_view_ids = trim( $recent_view_ids, ',' );
-			$recent_view_ids = explode( ',', $recent_view_ids );
-			if ( $indexes = array_keys( $recent_view_ids, $post->ID ) ) {
-				foreach ( $indexes as $index ) {
-					unset( $recent_view_ids[$index] );
-				}
-			}
-			array_unshift( $recent_view_ids, $post->ID );
-			$recent_view_ids = array_slice( $recent_view_ids, 0, $this->settings['generations'] );
-			$recent_view_ids = implode( ',', $recent_view_ids );
-			$expire = time() + $this->settings['expire'] * 24 * 3600;
-			setcookie( 'recent-views', $recent_view_ids, $expire, '/' );
+			wp_enqueue_script( 'wp-recent-views', plugin_dir_url( __FILE__ ) . 'js/wp-recent-views.js', array(), $this->version, true );
 		}
+	}
+	
+	
+	public function register_post_id() {
+		global $post;
+		$path = preg_replace( '#^' . $_SERVER['DOCUMENT_ROOT'] . '#', '', str_replace( '\\', '/', ABSPATH ) );
+?>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var viewPost = { id: "<?php echo esc_js( $post->ID ); ?>", generations: "<?php echo esc_js( $this->settings['generations'] ); ?>", path: "<?php echo esc_js( $path ); ?>", maxAge: "<?php echo esc_js( $this->settings['expire'] * 24 * 3600 ); ?>" };
+/* ]]> */
+</script>
+<?
 	}
 	
 	

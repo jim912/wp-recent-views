@@ -106,7 +106,7 @@ function wp_list_recent_views( $args ) {
 				}
 			}
 		} else {
-			wp_enqueue_script( 'wp_list_recent_views', plugin_dir_url( __FILE__ ) . '/js/recent-views.js', array( 'jquery' ) );
+			wp_enqueue_script( 'wp_list_recent_views', plugin_dir_url( __FILE__ ) . 'js/recent-views.js', array( 'jquery' ), $WP_Recent_Views->version );
 			wp_localize_script( 'wp_list_recent_views', 'RecentViews', array(
 				'endpoint' => admin_url( 'admin-ajax.php' ),
 				'action' => 'recent_views',
