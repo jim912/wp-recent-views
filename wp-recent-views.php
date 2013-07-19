@@ -68,7 +68,7 @@ class WP_Recent_Views {
 var viewPost = { id: "<?php echo esc_js( $post->ID ); ?>", generations: "<?php echo esc_js( $this->settings['generations'] ); ?>", path: "<?php echo esc_js( $path ); ?>", maxAge: "<?php echo esc_js( $this->settings['expire'] * 24 * 3600 ); ?>" };
 /* ]]> */
 </script>
-<?
+<?php
 	}
 	
 	
